@@ -189,7 +189,7 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
       {/* Drag Handle */}
       <div 
         onPointerDown={handlePointerDown}
-        className="absolute -top-3 -left-3 p-1.5 bg-cyan-500 text-black rounded-full cursor-move opacity-0 group-hover/drag:opacity-100 transition-opacity z-50 shadow-md hover:scale-110 active:scale-95"
+        className="absolute top-2 left-2 p-2 bg-cyan-500 text-black rounded-full cursor-move opacity-0 group-hover/drag:opacity-100 transition-opacity z-50 shadow-md hover:scale-110 active:scale-95"
         title="拖拽移动"
       >
         <Move size={12} />
