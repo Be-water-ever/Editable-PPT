@@ -363,17 +363,19 @@ const SlideView: React.FC<SlideViewProps> = ({ slide, onUpdate, onDeleteElement 
             </DraggableWrapper>
             
             <div className="flex-grow flex gap-8 min-h-0">
-              <div className="w-1/2 flex flex-col items-start">
+              <div className="w-1/2 flex flex-col h-full">
                  {/* Image often goes on left or right, flexible here based on content */}
                  {(slide.imageDesc || slide.imageUrl) && (
-                   <DraggableWrapper elementId="image" positions={slide.elementPositions} sizes={slide.elementSizes} onUpdate={handlePosUpdate} onSizeUpdate={handleSizeUpdate} className="mb-4">
+                   <DraggableWrapper elementId="image" positions={slide.elementPositions} sizes={slide.elementSizes} onUpdate={handlePosUpdate} onSizeUpdate={handleSizeUpdate} className="h-full mb-4">
                      {renderImageOrPlaceholder("h-full")}
                    </DraggableWrapper>
                  )}
               </div>
-              <div className="w-1/2 flex flex-col overflow-y-auto">
-                 <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onUpdate={handlePosUpdate} onSizeUpdate={handleSizeUpdate} className="inline-block">
-                    <EditableText field="rightColumn" className="text-lg leading-relaxed" />
+              <div className="w-1/2 flex flex-col h-full overflow-y-auto">
+                 <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onUpdate={handlePosUpdate} onSizeUpdate={handleSizeUpdate} className="h-full">
+                    <div className="bg-slate-800/30 p-6 rounded-lg border border-slate-700/50 backdrop-blur-sm h-full">
+                        <EditableText field="rightColumn" className="text-lg leading-relaxed h-full" />
+                    </div>
                  </DraggableWrapper>
               </div>
             </div>
