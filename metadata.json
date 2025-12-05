@@ -1,0 +1,5 @@
+{
+  "name": "Psychological Types Presentation",
+  "description": "A React-based interactive presentation tool demonstrating Carl Jung's 'Psychological Types', allowing users to edit slide content.",
+  "requestFramePermissions": []
+}
