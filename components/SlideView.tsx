@@ -329,10 +329,10 @@ const SlideView: React.FC<SlideViewProps> = ({ slide, onUpdate, onDeleteElement 
                    </DraggableWrapper>
                  )}
               </div>
-              <div className="w-1/2 flex flex-col h-full overflow-y-auto">
-                 <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId} className="h-full">
-                    <div className="bg-slate-800/30 p-6 rounded-lg border border-slate-700/50 backdrop-blur-sm h-full">
-                        <EditableText field="rightColumn" className="text-lg leading-relaxed h-full" />
+              <div className="w-1/2 flex flex-col h-full overflow-visible relative z-20">
+                 <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId} className="">
+                    <div className="bg-slate-800/30 p-6 rounded-lg backdrop-blur-sm">
+                        <EditableText field="rightColumn" className="text-lg leading-relaxed" />
                     </div>
                  </DraggableWrapper>
               </div>
