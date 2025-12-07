@@ -356,23 +356,41 @@ const SlideView: React.FC<SlideViewProps> = ({ slide, onUpdate, onDeleteElement 
                <EditableText field="subtitle" tagName="h3" className="text-xl text-cyan-200/80" />
             </DraggableWrapper>
             
-            <div className="flex-grow flex gap-8 min-h-0">
-              <div className="w-1/2 flex flex-col h-full">
-                 {/* Image often goes on left or right, flexible here based on content */}
-                 {(slide.imageDesc || slide.imageUrl) && (
-                   <DraggableWrapper elementId="image" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId} className="h-full mb-4">
-                     {renderImageOrPlaceholder("h-full")}
+            {/* Special layout for slide 6: image on left, text on right, text on top layer */}
+            {slide.id === 6 ? (
+              <div className="flex-grow relative min-h-0 flex gap-6">
+                {/* Left half image */}
+                {(slide.imageDesc || slide.imageUrl) && (
+                  <DraggableWrapper elementId="image" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId} className="w-[48%] z-0">
+                    {renderImageOrPlaceholder("h-full")}
+                  </DraggableWrapper>
+                )}
+                {/* Right half text, on top layer */}
+                <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId} className="w-[48%] z-10">
+                  <div className="bg-slate-800/80 p-6 rounded-lg border border-slate-700/50 backdrop-blur-md h-full overflow-y-auto">
+                    <EditableText field="rightColumn" className="text-lg leading-relaxed h-full" />
+                  </div>
+                </DraggableWrapper>
+              </div>
+            ) : (
+              <div className="flex-grow flex gap-8 min-h-0">
+                <div className="w-1/2 flex flex-col h-full">
+                   {/* Image often goes on left or right, flexible here based on content */}
+                   {(slide.imageDesc || slide.imageUrl) && (
+                     <DraggableWrapper elementId="image" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId} className="h-full mb-4">
+                       {renderImageOrPlaceholder("h-full")}
+                     </DraggableWrapper>
+                   )}
+                </div>
+                <div className="w-1/2 flex flex-col h-full overflow-y-auto">
+                   <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId} className="h-full">
+                      <div className="bg-slate-800/30 p-6 rounded-lg border border-slate-700/50 backdrop-blur-sm h-full">
+                          <EditableText field="rightColumn" className="text-lg leading-relaxed h-full" />
+                      </div>
                    </DraggableWrapper>
-                 )}
+                </div>
               </div>
-              <div className="w-1/2 flex flex-col h-full overflow-y-auto">
-                 <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId} className="h-full">
-                    <div className="bg-slate-800/30 p-6 rounded-lg border border-slate-700/50 backdrop-blur-sm h-full">
-                        <EditableText field="rightColumn" className="text-lg leading-relaxed h-full" />
-                    </div>
-                 </DraggableWrapper>
-              </div>
-            </div>
+            )}
           </>
         );
 
@@ -396,96 +414,26 @@ const SlideView: React.FC<SlideViewProps> = ({ slide, onUpdate, onDeleteElement 
                  </DraggableWrapper>
                  
                  <DraggableWrapper elementId="middleColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId}>
-                    {/* Special rendering for Infinity Loop - Last slide (id: 7) */}
-                    {slide.id === 7 ? (
-                      <div className="h-full flex items-center justify-center relative group bg-transparent">
-                        {/* Glowing Infinity Symbol */}
-                        <div className="relative w-full h-full flex items-center justify-center">
-                          {/* SVG Infinity Loop with Gradients */}
-                          <svg viewBox="0 0 240 120" className="w-full h-full max-w-md max-h-48 drop-shadow-[0_0_20px_rgba(6,182,212,0.8)]">
-                            <defs>
-                              <linearGradient id={`infinity-grad-${slide.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#22d3ee" stopOpacity="1" />
-                                <stop offset="50%" stopColor="#3b82f6" stopOpacity="1" />
-                                <stop offset="100%" stopColor="#a855f7" stopOpacity="1" />
-                              </linearGradient>
-                              <filter id={`glow-${slide.id}`}>
-                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                                <feMerge>
-                                  <feMergeNode in="coloredBlur"/>
-                                  <feMergeNode in="SourceGraphic"/>
-                                </feMerge>
-                              </filter>
-                              <marker id={`arrowhead-top-${slide.id}`} markerWidth="15" markerHeight="12" refX="12" refY="6" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 15 12">
-                                <polygon points="0 0, 15 6, 0 12" fill="#60a5fa" stroke="#3b82f6" strokeWidth="1" />
-                              </marker>
-                              <marker id={`arrowhead-bottom-${slide.id}`} markerWidth="15" markerHeight="12" refX="12" refY="6" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 15 12">
-                                <polygon points="0 0, 15 6, 0 12" fill="#c084fc" stroke="#a855f7" strokeWidth="1" />
-                              </marker>
-                            </defs>
-                            
-                            {/* Main Infinity Loop Path - Correct ∞ shape */}
-                            <path 
-                              d="M 60 60 
-                                 C 60 30, 20 30, 20 60
-                                 C 20 90, 60 90, 60 60
-                                 M 60 60
-                                 C 60 30, 100 60, 180 60
-                                 C 180 90, 220 90, 220 60
-                                 C 220 30, 180 30, 180 60
-                                 C 100 60, 60 90, 60 60" 
-                              fill="none" 
-                              stroke={`url(#infinity-grad-${slide.id})`}
-                              strokeWidth="6" 
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              filter={`url(#glow-${slide.id})`}
-                              className="opacity-90"
-                            />
-                            
-                            {/* Top Arrow (Right to Left) - Following upper curve of infinity */}
-                            <path
-                              d="M 210 35 C 170 35, 130 35, 90 35 C 50 35, 30 35, 30 35"
-                              fill="none"
-                              stroke="#60a5fa"
-                              strokeWidth="5"
-                              strokeLinecap="round"
-                              markerEnd={`url(#arrowhead-top-${slide.id})`}
-                              className="opacity-100"
-                            />
-                            
-                            {/* Bottom Arrow (Left to Right) - Following lower curve of infinity */}
-                            <path
-                              d="M 30 85 C 50 85, 90 85, 130 85 C 170 85, 210 85, 210 85"
-                              fill="none"
-                              stroke="#c084fc"
-                              strokeWidth="5"
-                              strokeLinecap="round"
-                              markerEnd={`url(#arrowhead-bottom-${slide.id})`}
-                              className="opacity-100"
-                            />
-                          </svg>
-                          
-                          {/* Particle/Energy Effects */}
-                          <div className="absolute inset-0 pointer-events-none">
-                             <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_8px_#22d3ee] animate-[ping_2s_ease-in-out_infinite]" />
-                             <div className="absolute top-1/2 right-1/4 w-2 h-2 bg-purple-400 rounded-full shadow-[0_0_8px_#a855f7] animate-[ping_2s_ease-in-out_infinite_1s]" />
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                       <div className="bg-gradient-to-b from-slate-800/50 to-slate-900/50 p-5 rounded-xl border border-blue-500/20 hover:border-cyan-400/50 transition-colors h-full shadow-lg">
+                    <div className="bg-gradient-to-b from-slate-800/50 to-slate-900/50 p-5 rounded-xl border border-blue-500/20 hover:border-cyan-400/50 transition-colors h-full shadow-lg">
+                       {/* Image placeholder for middle column */}
+                       {slide.id === 7 ? (
+                         <div className="h-full flex items-center justify-center">
+                           {renderImageOrPlaceholder("h-full")}
+                         </div>
+                       ) : (
+                         <>
                            {/* Special case: if middle column has an image placeholder intent in constants */}
-                          {(slide.imageDesc && slide.middleColumn?.includes('img')) ? (
-                              <div className="h-full flex flex-col">
-                                <div className="flex-grow relative">{renderImageOrPlaceholder("h-full")}</div>
-                                <EditableText field="middleColumn" className="mt-2" />
-                              </div>
-                          ) : (
-                             <EditableText field="middleColumn" className="h-full" />
-                          )}
-                       </div>
-                    )}
+                           {(slide.imageDesc && slide.middleColumn?.includes('img')) ? (
+                               <div className="h-full flex flex-col">
+                                 <div className="flex-grow relative">{renderImageOrPlaceholder("h-full")}</div>
+                                 <EditableText field="middleColumn" className="mt-2" />
+                               </div>
+                           ) : (
+                              <EditableText field="middleColumn" className="h-full" />
+                           )}
+                         </>
+                       )}
+                    </div>
                  </DraggableWrapper>
 
                  <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId}>

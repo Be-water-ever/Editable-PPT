@@ -68,7 +68,8 @@ export const INITIAL_SLIDES: SlideContent[] = [
     id: 7,
     title: "我们致力于构建<br/>AI影视的下一代生产范式",
     leftColumn: "<div class='flex flex-col gap-8 h-full justify-center'><h3 class='text-2xl font-bold border-b border-white/20 pb-4'>AI影视生产范式</h3><div class='flex gap-3 items-center'><span class='text-cyan-400'>📷</span> <span>技术积累：AI换脸、一致性、3D场景构造</span></div><div class='flex gap-3 items-center'><span class='text-cyan-400'>⚙️</span> <span>团队组织：混合制片、片场流程、人员组织方式</span></div><div class='flex gap-3 items-center'><span class='text-cyan-400'>🔗</span> <span>标准化能力：可重复、可规模化的制作链路</span></div></div>",
-    middleColumn: "<div class='flex items-center justify-center h-full'><div class='w-48 h-32 border-4 border-cyan-500/50 rounded-[100%] rotate-45 animate-pulse shadow-[0_0_30px_rgba(6,182,212,0.5)] flex items-center justify-center'><span class='text-4xl -rotate-45'>♾️</span></div></div>", // Symbolic representation of infinity loop
+    middleColumn: "",
+    imageDesc: "Infinity Loop / 无限循环",
     rightColumn: "<div class='flex flex-col gap-8 h-full justify-center text-right'><h3 class='text-2xl font-bold border-b border-white/20 pb-4'>AIGC创作者生态</h3><div class='flex gap-3 items-center justify-end'><span>稳定创作者库 (2000+ 名活跃创作者)</span> <span class='text-orange-400'>👥</span></div><div class='flex gap-3 items-center justify-end'><span>分类大赛体系 (短片 / 短剧 / 动漫 / MV)</span> <span class='text-orange-400'>🏆</span></div><div class='flex gap-3 items-center justify-end'><span>持续内容供给链路 (作品展示、个人主页...)</span> <span class='text-orange-400'>☁️</span></div></div>",
     bottomSection: "AI + 影视的价值远不止降本，而在于重构内容生产的底层逻辑。<br/><span class='text-sm text-slate-400'>我们诚邀更多 AIGC 超创、学界与行业伙伴加入灵芽社区，共同打造未来十年的新型内容生产方式。</span>",
     layout: LayoutType.THREE_COLUMN
