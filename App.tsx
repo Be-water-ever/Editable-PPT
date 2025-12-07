@@ -93,6 +93,7 @@ const App: React.FC = () => {
     
     // Initial position centered roughly (relative to slide container)
     const initialPos = { x: 200, y: 150 };
+    const initialSize = { width: 280, height: 100 };
     
     setPast(prev => [...prev, slides]);
     setFuture([]);
@@ -102,7 +103,8 @@ const App: React.FC = () => {
        return {
          ...slide,
          customElements: [...(slide.customElements || []), newElement],
-         elementPositions: { ...(slide.elementPositions || {}), [id]: initialPos }
+         elementPositions: { ...(slide.elementPositions || {}), [id]: initialPos },
+         elementSizes: { ...(slide.elementSizes || {}), [id]: initialSize }
        };
     }));
   };

@@ -38,7 +38,11 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
   const [currentSize, setCurrentSize] = useState<Size | null>(sizes?.[elementId] || null);
   const dragStartRef = useRef<{ x: number, y: number } | null>(null);
   const initialPosRef = useRef<{ x: number, y: number } | null>(null);
-  const resizeStartRef = useRef<{ x: number, y: number, width: number, height: number } | null>(null);
+  const resizeStartRef = useRef<{ x: number, y: number, width: number, height: number, posX: number, posY: number } | null>(null);
+  
+  // Check if className already contains 'absolute' - if so, don't add 'relative'
+  const isAbsolute = className.includes('absolute');
+  const positionClass = isAbsolute ? '' : 'relative';
 
   useEffect(() => {
     setCurrentPos(positions?.[elementId] || { x: 0, y: 0 });
@@ -70,11 +74,39 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
 
       let newWidth = resizeStartRef.current.width;
       let newHeight = resizeStartRef.current.height;
+      let newPosX = resizeStartRef.current.posX;
+      let newPosY = resizeStartRef.current.posY;
 
-      if (resizeHandle.includes('e')) newWidth = Math.max(50, resizeStartRef.current.width + dx);
-      if (resizeHandle.includes('w')) newWidth = Math.max(50, resizeStartRef.current.width - dx);
-      if (resizeHandle.includes('s')) newHeight = Math.max(50, resizeStartRef.current.height + dy);
-      if (resizeHandle.includes('n')) newHeight = Math.max(50, resizeStartRef.current.height - dy);
+      // East (right edge): increase width
+      if (resizeHandle.includes('e')) {
+        newWidth = Math.max(50, resizeStartRef.current.width + dx);
+      }
+      // West (left edge): decrease width and move position right
+      if (resizeHandle.includes('w')) {
+        const proposedWidth = resizeStartRef.current.width - dx;
+        if (proposedWidth >= 50) {
+          newWidth = proposedWidth;
+          newPosX = resizeStartRef.current.posX + dx;
+        } else {
+          newWidth = 50;
+          newPosX = resizeStartRef.current.posX + (resizeStartRef.current.width - 50);
+        }
+      }
+      // South (bottom edge): increase height
+      if (resizeHandle.includes('s')) {
+        newHeight = Math.max(50, resizeStartRef.current.height + dy);
+      }
+      // North (top edge): decrease height and move position down
+      if (resizeHandle.includes('n')) {
+        const proposedHeight = resizeStartRef.current.height - dy;
+        if (proposedHeight >= 50) {
+          newHeight = proposedHeight;
+          newPosY = resizeStartRef.current.posY + dy;
+        } else {
+          newHeight = 50;
+          newPosY = resizeStartRef.current.posY + (resizeStartRef.current.height - 50);
+        }
+      }
 
       if (e.shiftKey && resizeStartRef.current.width > 0 && resizeStartRef.current.height > 0) {
         const aspect = resizeStartRef.current.width / resizeStartRef.current.height;
@@ -86,6 +118,7 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
       }
 
       setCurrentSize({ width: newWidth, height: newHeight });
+      setCurrentPos({ x: newPosX, y: newPosY });
     } else if (isDragging && dragStartRef.current && initialPosRef.current) {
       const dx = e.clientX - dragStartRef.current.x;
       const dy = e.clientY - dragStartRef.current.y;
@@ -101,6 +134,8 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
     if (isResizing) {
       setIsResizing(false);
       if (currentSize && onSizeUpdate) onSizeUpdate(elementId, currentSize);
+      // Also update position if it changed during resize (for n/w handles)
+      onUpdate(elementId, currentPos);
       setResizeHandle(null);
       resizeStartRef.current = null;
       (e.target as Element).releasePointerCapture(e.pointerId);
@@ -123,7 +158,9 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
         x: e.clientX,
         y: e.clientY,
         width: currentSize?.width || rect.width,
-        height: currentSize?.height || rect.height
+        height: currentSize?.height || rect.height,
+        posX: currentPos.x,
+        posY: currentPos.y
       };
     }
     (e.target as Element).setPointerCapture(e.pointerId);
@@ -135,10 +172,9 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
     minWidth: '50px',
     minHeight: '50px'
   } : {};
-
   return (
     <div 
-      className={`relative group/drag ${className}`}
+      className={`${positionClass} group/drag ${className}`}
       style={{ 
         transform: `translate(${currentPos.x}px, ${currentPos.y}px)`,
         ...sizeStyle,
@@ -329,10 +365,10 @@ const SlideView: React.FC<SlideViewProps> = ({ slide, onUpdate, onDeleteElement 
                    </DraggableWrapper>
                  )}
               </div>
-              <div className="w-1/2 flex flex-col h-full overflow-visible relative z-20">
-                 <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId} className="">
-                    <div className="bg-slate-800/30 p-6 rounded-lg backdrop-blur-sm">
-                        <EditableText field="rightColumn" className="text-lg leading-relaxed" />
+              <div className="w-1/2 flex flex-col h-full overflow-y-auto">
+                 <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId} className="h-full">
+                    <div className="bg-slate-800/30 p-6 rounded-lg border border-slate-700/50 backdrop-blur-sm h-full">
+                        <EditableText field="rightColumn" className="text-lg leading-relaxed h-full" />
                     </div>
                  </DraggableWrapper>
               </div>
@@ -360,18 +396,96 @@ const SlideView: React.FC<SlideViewProps> = ({ slide, onUpdate, onDeleteElement 
                  </DraggableWrapper>
                  
                  <DraggableWrapper elementId="middleColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId}>
-                    {/* If middle column is image dominant, we can check imageDesc but typically text in this layout */}
-                    <div className="bg-gradient-to-b from-slate-800/50 to-slate-900/50 p-5 rounded-xl border border-blue-500/20 hover:border-cyan-400/50 transition-colors h-full shadow-lg">
-                        {/* Special case: if middle column has an image placeholder intent in constants */}
-                       {(slide.imageDesc && slide.middleColumn?.includes('img')) ? (
-                           <div className="h-full flex flex-col">
-                             <div className="flex-grow relative">{renderImageOrPlaceholder("h-full")}</div>
-                             <EditableText field="middleColumn" className="mt-2" />
-                           </div>
-                       ) : (
-                          <EditableText field="middleColumn" className="h-full" />
-                       )}
-                    </div>
+                    {/* Special rendering for Infinity Loop - Last slide (id: 7) */}
+                    {slide.id === 7 ? (
+                      <div className="h-full flex items-center justify-center relative group bg-transparent">
+                        {/* Glowing Infinity Symbol */}
+                        <div className="relative w-full h-full flex items-center justify-center">
+                          {/* SVG Infinity Loop with Gradients */}
+                          <svg viewBox="0 0 240 120" className="w-full h-full max-w-md max-h-48 drop-shadow-[0_0_20px_rgba(6,182,212,0.8)]">
+                            <defs>
+                              <linearGradient id={`infinity-grad-${slide.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stopColor="#22d3ee" stopOpacity="1" />
+                                <stop offset="50%" stopColor="#3b82f6" stopOpacity="1" />
+                                <stop offset="100%" stopColor="#a855f7" stopOpacity="1" />
+                              </linearGradient>
+                              <filter id={`glow-${slide.id}`}>
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                  <feMergeNode in="coloredBlur"/>
+                                  <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                              </filter>
+                              <marker id={`arrowhead-top-${slide.id}`} markerWidth="15" markerHeight="12" refX="12" refY="6" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 15 12">
+                                <polygon points="0 0, 15 6, 0 12" fill="#60a5fa" stroke="#3b82f6" strokeWidth="1" />
+                              </marker>
+                              <marker id={`arrowhead-bottom-${slide.id}`} markerWidth="15" markerHeight="12" refX="12" refY="6" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 15 12">
+                                <polygon points="0 0, 15 6, 0 12" fill="#c084fc" stroke="#a855f7" strokeWidth="1" />
+                              </marker>
+                            </defs>
+                            
+                            {/* Main Infinity Loop Path - Correct ∞ shape */}
+                            <path 
+                              d="M 60 60 
+                                 C 60 30, 20 30, 20 60
+                                 C 20 90, 60 90, 60 60
+                                 M 60 60
+                                 C 60 30, 100 60, 180 60
+                                 C 180 90, 220 90, 220 60
+                                 C 220 30, 180 30, 180 60
+                                 C 100 60, 60 90, 60 60" 
+                              fill="none" 
+                              stroke={`url(#infinity-grad-${slide.id})`}
+                              strokeWidth="6" 
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              filter={`url(#glow-${slide.id})`}
+                              className="opacity-90"
+                            />
+                            
+                            {/* Top Arrow (Right to Left) - Following upper curve of infinity */}
+                            <path
+                              d="M 210 35 C 170 35, 130 35, 90 35 C 50 35, 30 35, 30 35"
+                              fill="none"
+                              stroke="#60a5fa"
+                              strokeWidth="5"
+                              strokeLinecap="round"
+                              markerEnd={`url(#arrowhead-top-${slide.id})`}
+                              className="opacity-100"
+                            />
+                            
+                            {/* Bottom Arrow (Left to Right) - Following lower curve of infinity */}
+                            <path
+                              d="M 30 85 C 50 85, 90 85, 130 85 C 170 85, 210 85, 210 85"
+                              fill="none"
+                              stroke="#c084fc"
+                              strokeWidth="5"
+                              strokeLinecap="round"
+                              markerEnd={`url(#arrowhead-bottom-${slide.id})`}
+                              className="opacity-100"
+                            />
+                          </svg>
+                          
+                          {/* Particle/Energy Effects */}
+                          <div className="absolute inset-0 pointer-events-none">
+                             <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_8px_#22d3ee] animate-[ping_2s_ease-in-out_infinite]" />
+                             <div className="absolute top-1/2 right-1/4 w-2 h-2 bg-purple-400 rounded-full shadow-[0_0_8px_#a855f7] animate-[ping_2s_ease-in-out_infinite_1s]" />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                       <div className="bg-gradient-to-b from-slate-800/50 to-slate-900/50 p-5 rounded-xl border border-blue-500/20 hover:border-cyan-400/50 transition-colors h-full shadow-lg">
+                           {/* Special case: if middle column has an image placeholder intent in constants */}
+                          {(slide.imageDesc && slide.middleColumn?.includes('img')) ? (
+                              <div className="h-full flex flex-col">
+                                <div className="flex-grow relative">{renderImageOrPlaceholder("h-full")}</div>
+                                <EditableText field="middleColumn" className="mt-2" />
+                              </div>
+                          ) : (
+                             <EditableText field="middleColumn" className="h-full" />
+                          )}
+                       </div>
+                    )}
                  </DraggableWrapper>
 
                  <DraggableWrapper elementId="rightColumn" positions={slide.elementPositions} sizes={slide.elementSizes} onSizeUpdate={handleSizeUpdate} onUpdate={handlePosUpdate} activeElementId={activeElementId} onActivate={setActiveElementId}>
@@ -465,50 +579,50 @@ const SlideView: React.FC<SlideViewProps> = ({ slide, onUpdate, onDeleteElement 
         
         <div className="relative z-10 flex flex-col h-full">
             {renderContent()}
-            
-            {/* Custom Elements Layer */}
-            {slide.customElements?.map(el => (
-              <DraggableWrapper 
-                key={el.id} 
-                elementId={el.id} 
-                positions={slide.elementPositions} 
-                sizes={slide.elementSizes}
-                onUpdate={handlePosUpdate} 
-                onSizeUpdate={handleSizeUpdate}
-                activeElementId={activeElementId}
-                onActivate={setActiveElementId}
-                className="absolute z-20"
-              >
-                {/* Delete Button */}
-                {onDeleteElement && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteElement(el.id);
-                    }}
-                    className="absolute -top-3 -right-3 p-1.5 bg-red-500 text-white rounded-full cursor-pointer opacity-0 group-hover/drag:opacity-100 transition-opacity z-50 shadow-md hover:scale-110 active:scale-95 hover:bg-red-600"
-                    title="删除组件"
-                  >
-                    <X size={12} />
-                  </button>
-                )}
-                
-                {el.type === 'text' ? (
-                   <div className="min-w-[120px] min-h-[60px] bg-slate-800/90 backdrop-blur-sm border border-cyan-500/50 rounded p-3 shadow">
-                      <EditableText 
-                        value={el.content} 
-                        onSave={(val) => handleCustomElementUpdate(el.id, val)}
-                        className="w-full h-full"
-                      />
-                   </div>
-                ) : (
-                   <div className="w-full h-full border-2 border-cyan-500/50 rounded overflow-hidden bg-slate-900">
-                      <img src={el.content} alt="Custom" className="w-full h-full object-contain pointer-events-none" />
-                   </div>
-                )}
-              </DraggableWrapper>
-            ))}
         </div>
+            
+        {/* Custom Elements Layer */}
+        {slide.customElements?.map(el => (
+          <DraggableWrapper 
+            key={el.id} 
+            elementId={el.id} 
+            positions={slide.elementPositions} 
+            sizes={slide.elementSizes}
+            onUpdate={handlePosUpdate} 
+            onSizeUpdate={handleSizeUpdate}
+            activeElementId={activeElementId}
+            onActivate={setActiveElementId}
+            className="absolute z-20"
+          >
+            {/* Delete Button */}
+            {onDeleteElement && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteElement(el.id);
+                }}
+                className="absolute -top-3 -right-3 p-1.5 bg-red-500 text-white rounded-full cursor-pointer opacity-0 group-hover/drag:opacity-100 transition-opacity z-50 shadow-md hover:scale-110 active:scale-95 hover:bg-red-600"
+                title="删除组件"
+              >
+                <X size={12} />
+              </button>
+            )}
+            
+            {el.type === 'text' ? (
+               <div className="w-full h-full bg-slate-800/90 backdrop-blur-sm border border-cyan-500/50 rounded p-3 shadow">
+                  <EditableText 
+                    value={el.content} 
+                    onSave={(val) => handleCustomElementUpdate(el.id, val)}
+                    className="w-full h-full"
+                  />
+               </div>
+            ) : (
+               <div className="w-full h-full border-2 border-cyan-500/50 rounded overflow-hidden bg-slate-900">
+                  <img src={el.content} alt="Custom" className="w-full h-full object-contain pointer-events-none" />
+               </div>
+            )}
+          </DraggableWrapper>
+        ))}
 
         <div className="absolute bottom-4 right-6 text-xs text-slate-500 font-mono tracking-widest">
           SLIDE_ID: {String(slide.id).padStart(2, '0')} // AI_FILM_PROD
