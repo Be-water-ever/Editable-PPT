@@ -2,9 +2,10 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { INITIAL_SLIDES } from './constants';
 import { SlideContent, CustomElement } from './types';
 import SlideView from './components/SlideView';
-import { ChevronLeft, ChevronRight, BookOpen, Grid, Undo, Redo, Type, Image as ImageIcon, Plus, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, Grid, Undo, Redo, Type, Image as ImageIcon, Plus, Download, FileJson, FileType, Image } from 'lucide-react';
 import { APP_VERSION } from './version';
 import { exportToPPT } from './utils/pptExporter';
+import { exportToPNG, exportToPDF } from './utils/imageExporter';
 
 const App: React.FC = () => {
   const [slides, setSlides] = useState<SlideContent[]>(INITIAL_SLIDES);
@@ -14,6 +15,7 @@ const App: React.FC = () => {
   const [isOverview, setIsOverview] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null); // For adding new images
 
@@ -306,13 +308,54 @@ const App: React.FC = () => {
           <span className="text-slate-400 text-sm">
             {currentSlideIndex + 1} / {slides.length}
           </span>
-          <button 
-            onClick={() => exportToPPT(slides)}
-            className="p-2 rounded hover:bg-slate-800 transition-colors text-slate-300 hover:text-cyan-400"
-            title="Export to PPTX"
-          >
-            <Download size={20} />
-          </button>
+          
+          <div className="relative">
+            <button 
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className={`p-2 rounded hover:bg-slate-800 transition-colors ${showExportMenu ? 'bg-slate-800 text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}
+              title="Export Options"
+            >
+              <Download size={20} />
+            </button>
+            
+            {showExportMenu && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden">
+                <button 
+                  onClick={() => { exportToPPT(slides); setShowExportMenu(false); }}
+                  className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-2"
+                >
+                  <FileJson size={16} className="text-orange-400" /> 
+                  <span>Export PPTX</span>
+                </button>
+                <div className="h-px bg-slate-700 mx-2"></div>
+                <button 
+                  onClick={() => { exportToPDF(slides, `slide-${currentSlideIndex + 1}.pdf`); setShowExportMenu(false); }}
+                  className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-2"
+                >
+                  <FileType size={16} className="text-red-400" /> 
+                  <div className="flex flex-col">
+                    <span>Current Slide to PDF</span>
+                    <span className="text-[10px] text-slate-500">拉伸到同一尺寸 (A4)</span>
+                  </div>
+                </button>
+                <button 
+                  onClick={() => { exportToPNG('slide-viewport', `slide-${currentSlideIndex + 1}.png`); setShowExportMenu(false); }}
+                  className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-2"
+                >
+                  <Image size={16} className="text-blue-400" /> 
+                  <div className="flex flex-col">
+                    <span>Current Slide to PNG</span>
+                    <span className="text-[10px] text-slate-500">当前浏览器可见尺寸</span>
+                  </div>
+                </button>
+              </div>
+            )}
+            {/* Backdrop to close menu */}
+            {showExportMenu && (
+              <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)}></div>
+            )}
+          </div>
+
           <button 
             onClick={() => setIsOverview(!isOverview)}
             className={`p-2 rounded hover:bg-slate-800 transition-colors ${isOverview ? 'bg-slate-800 text-cyan-400' : 'text-slate-300'}`}
@@ -366,12 +409,12 @@ const App: React.FC = () => {
           </div>
         ) : (
           <div className="w-full h-full flex flex-col">
-             <div className="flex-grow">
+             <div className="flex-grow" id="slide-viewport">
                <SlideView slide={currentSlide} onUpdate={handleUpdateSlide} onDeleteElement={handleDeleteElement} />
              </div>
              
              {/* Navigation Controls (Bottom Overlay) */}
-             <div className="h-16 flex items-center justify-center gap-8 pb-4 pointer-events-none absolute bottom-0 w-full">
+             <div className="h-16 flex items-center justify-center gap-8 pb-4 pointer-events-none absolute bottom-0 w-full no-export">
                 <button 
                   onClick={prevSlide} 
                   disabled={currentSlideIndex === 0}
