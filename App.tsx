@@ -270,17 +270,17 @@ const App: React.FC = () => {
                 <button 
                    onClick={addTextElement} 
                    className="p-1.5 text-slate-400 hover:text-white transition-colors flex items-center gap-1 px-2"
-                   title="Add Text Box"
+                   title="添加文本框"
                 >
-                   <Type size={16} /> <span className="text-xs font-bold">TEXT</span>
+                   <Type size={16} /> <span className="text-xs font-bold">文本</span>
                 </button>
                 <div className="w-px h-4 bg-slate-700 mx-1"></div>
                 <button 
                    onClick={triggerAddImage} 
                    className="p-1.5 text-slate-400 hover:text-white transition-colors flex items-center gap-1 px-2"
-                   title="Add Image"
+                   title="添加图片"
                 >
-                   <ImageIcon size={16} /> <span className="text-xs font-bold">IMG</span>
+                   <ImageIcon size={16} /> <span className="text-xs font-bold">图片</span>
                 </button>
              </div>
 
@@ -290,7 +290,7 @@ const App: React.FC = () => {
                 onClick={undo} 
                 disabled={past.length === 0}
                 className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Undo (Ctrl+Z)"
+                title="撤销 (Ctrl+Z)"
              >
                <Undo size={18} />
              </button>
@@ -299,7 +299,7 @@ const App: React.FC = () => {
                 onClick={redo} 
                 disabled={future.length === 0}
                 className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Redo (Ctrl+Y)"
+                title="重做 (Ctrl+Y)"
              >
                <Redo size={18} />
              </button>
@@ -313,7 +313,7 @@ const App: React.FC = () => {
             <button 
               onClick={() => setShowExportMenu(!showExportMenu)}
               className={`p-2 rounded hover:bg-slate-800 transition-colors ${showExportMenu ? 'bg-slate-800 text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}
-              title="Export Options"
+              title="导出选项"
             >
               <Download size={20} />
             </button>
@@ -325,7 +325,7 @@ const App: React.FC = () => {
                   className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-2"
                 >
                   <FileJson size={16} className="text-orange-400" /> 
-                  <span>Export PPTX</span>
+                  <span>导出 PPTX</span>
                 </button>
                 <div className="h-px bg-slate-700 mx-2"></div>
                 <button 
@@ -334,7 +334,7 @@ const App: React.FC = () => {
                 >
                   <FileType size={16} className="text-red-400" /> 
                   <div className="flex flex-col">
-                    <span>Current Slide to PDF</span>
+                    <span>当前页面导出为 PDF</span>
                     <span className="text-[10px] text-slate-500">拉伸到同一尺寸 (A4)</span>
                   </div>
                 </button>
@@ -344,7 +344,7 @@ const App: React.FC = () => {
                 >
                   <Image size={16} className="text-blue-400" /> 
                   <div className="flex flex-col">
-                    <span>Current Slide to PNG</span>
+                    <span>当前页面导出为 PNG</span>
                     <span className="text-[10px] text-slate-500">当前浏览器可见尺寸</span>
                   </div>
                 </button>
@@ -359,7 +359,7 @@ const App: React.FC = () => {
           <button 
             onClick={() => setIsOverview(!isOverview)}
             className={`p-2 rounded hover:bg-slate-800 transition-colors ${isOverview ? 'bg-slate-800 text-cyan-400' : 'text-slate-300'}`}
-            title="Slide Overview"
+            title="幻灯片概览"
           >
             <Grid size={20} />
           </button>
