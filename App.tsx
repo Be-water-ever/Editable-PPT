@@ -119,28 +119,53 @@ const App: React.FC = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-           const id = `img-${Date.now()}`;
-           const newElement: CustomElement = {
-             id,
-             type: 'image',
-             content: event.target.result as string
-           };
-           // Initial position and size centered roughly
-           const initialPos = { x: 200, y: 100 };
-           const initialSize = { width: 400, height: 300 };
-
-           setPast(prev => [...prev, slides]);
-           setFuture([]);
+           const imgUrl = event.target.result as string;
            
-           setSlides(prev => prev.map((slide, idx) => {
-              if (idx !== currentSlideIndex) return slide;
-              return {
-                ...slide,
-                customElements: [...(slide.customElements || []), newElement],
-                elementPositions: { ...(slide.elementPositions || {}), [id]: initialPos },
-                elementSizes: { ...(slide.elementSizes || {}), [id]: initialSize }
-              };
-           }));
+           // Create an image to get natural dimensions
+           const img = document.createElement('img');
+           img.onload = () => {
+               const id = `img-${Date.now()}`;
+               const newElement: CustomElement = {
+                 id,
+                 type: 'image',
+                 content: imgUrl
+               };
+               
+               // Calculate initial size maintaining aspect ratio
+               // Max dimensions: 600x400 roughly
+               const maxW = 600;
+               const maxH = 400;
+               let w = img.width;
+               let h = img.height;
+               
+               // Scale down if too large
+               if (w > maxW || h > maxH) {
+                   const ratio = Math.min(maxW / w, maxH / h);
+                   w = Math.round(w * ratio);
+                   h = Math.round(h * ratio);
+               }
+               
+               // Ensure min size
+               w = Math.max(w, 100);
+               h = Math.max(h, 100);
+
+               const initialPos = { x: 200, y: 100 };
+               const initialSize = { width: w, height: h };
+
+               setPast(prev => [...prev, slides]);
+               setFuture([]);
+               
+               setSlides(prev => prev.map((slide, idx) => {
+                  if (idx !== currentSlideIndex) return slide;
+                  return {
+                    ...slide,
+                    customElements: [...(slide.customElements || []), newElement],
+                    elementPositions: { ...(slide.elementPositions || {}), [id]: initialPos },
+                    elementSizes: { ...(slide.elementSizes || {}), [id]: initialSize }
+                  };
+               }));
+           };
+           img.src = imgUrl;
         }
       };
       reader.readAsDataURL(file);
