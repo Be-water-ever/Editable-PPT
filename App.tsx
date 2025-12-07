@@ -397,7 +397,7 @@ const App: React.FC = () => {
       <main className="flex-grow relative overflow-hidden flex bg-slate-900">
         {/* Version Number - Bottom Right Corner (Extremely Subtle) */}
         <div className="fixed bottom-0.5 right-0.5 z-[9999] pointer-events-none select-none">
-          <span className="text-[8px] text-slate-500/20 font-mono opacity-20">
+          <span className="text-[8px] text-slate-400/30 font-mono opacity-30">
             {APP_VERSION}
           </span>
         </div>
