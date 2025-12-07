@@ -29,6 +29,7 @@ export const exportToPNG = async (elementId: string = 'slide-viewport', fileName
     
     // Add a class to hide UI overlays during capture if needed
     element.classList.add('exporting');
+    element.classList.add('export-mode'); // Apply style fixes for html2canvas
     
     const canvas = await html2canvas(element, {
       useCORS: true, // Allow cross-origin images
@@ -42,6 +43,7 @@ export const exportToPNG = async (elementId: string = 'slide-viewport', fileName
     });
     
     element.classList.remove('exporting');
+    element.classList.remove('export-mode');
 
     const link = document.createElement('a');
     link.download = fileName;
@@ -86,6 +88,7 @@ export const exportToPDF = async (slides: SlideContent[], fileName: string = 'pr
   if (!element) return;
 
   try {
+      element.classList.add('export-mode'); // Apply style fixes for html2canvas
       const canvas = await html2canvas(element, {
         useCORS: true,
         scale: 2,
@@ -94,6 +97,8 @@ export const exportToPDF = async (slides: SlideContent[], fileName: string = 'pr
       });
 
       const imgData = canvas.toDataURL('image/png');
+      
+      element.classList.remove('export-mode');
       
       // A4 Landscape: 297mm x 210mm
       // 16:9 aspect ratio fits well
@@ -110,6 +115,7 @@ export const exportToPDF = async (slides: SlideContent[], fileName: string = 'pr
       pdf.save(fileName);
   } catch (error) {
     console.error('Export to PDF failed:', error);
+    element.classList.remove('export-mode');
   }
 };
 

@@ -31,6 +31,14 @@
         outline: 2px dashed #3b82f6;
         background-color: rgba(59, 130, 246, 0.05);
       }
+      /* Export Fixes for html2canvas */
+      .export-mode .text-transparent,
+      .export-mode .bg-clip-text {
+        color: white !important;
+        background: none !important;
+        -webkit-text-fill-color: white !important;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Add shadow to maintain readability */
+      }
     </style>
   <script type="importmap">
 {
