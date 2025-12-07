@@ -2,7 +2,9 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { INITIAL_SLIDES } from './constants';
 import { SlideContent, CustomElement } from './types';
 import SlideView from './components/SlideView';
-import { ChevronLeft, ChevronRight, BookOpen, Grid, Undo, Redo, Type, Image as ImageIcon, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, Grid, Undo, Redo, Type, Image as ImageIcon, Plus, Download } from 'lucide-react';
+import { APP_VERSION } from './version';
+import { exportToPPT } from './utils/pptExporter';
 
 const App: React.FC = () => {
   const [slides, setSlides] = useState<SlideContent[]>(INITIAL_SLIDES);
@@ -305,6 +307,13 @@ const App: React.FC = () => {
             {currentSlideIndex + 1} / {slides.length}
           </span>
           <button 
+            onClick={() => exportToPPT(slides)}
+            className="p-2 rounded hover:bg-slate-800 transition-colors text-slate-300 hover:text-cyan-400"
+            title="Export to PPTX"
+          >
+            <Download size={20} />
+          </button>
+          <button 
             onClick={() => setIsOverview(!isOverview)}
             className={`p-2 rounded hover:bg-slate-800 transition-colors ${isOverview ? 'bg-slate-800 text-cyan-400' : 'text-slate-300'}`}
             title="Slide Overview"
@@ -316,6 +325,13 @@ const App: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="flex-grow relative overflow-hidden flex bg-slate-900">
+        {/* Version Number - Bottom Right Corner (Extremely Subtle) */}
+        <div className="fixed bottom-0.5 right-0.5 z-[9999] pointer-events-none select-none">
+          <span className="text-[8px] text-slate-500/20 font-mono opacity-20">
+            {APP_VERSION}
+          </span>
+        </div>
+        
         {isOverview ? (
           <div className="w-full h-full overflow-auto p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {slides.map((slide, index) => (
