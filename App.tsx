@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { INITIAL_SLIDES } from './constants';
 import { SlideContent, CustomElement } from './types';
 import SlideView from './components/SlideView';
-import { ChevronLeft, ChevronRight, BookOpen, Grid, Undo, Redo, Type, Image as ImageIcon, Plus, Download, FileJson, FileType, Image } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, Grid, Undo, Redo, Type, Image as ImageIcon, Plus, Download, FileJson, FileType, Image, Monitor, RectangleHorizontal } from 'lucide-react';
 import { APP_VERSION } from './version';
 import { exportToPPT } from './utils/pptExporter';
 import { exportToPNG, exportToPDF } from './utils/imageExporter';
@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [layoutMode, setLayoutMode] = useState<'adaptive' | 'fixed'>('adaptive');
   
   const fileInputRef = useRef<HTMLInputElement>(null); // For adding new images
 
@@ -336,6 +337,14 @@ const App: React.FC = () => {
             {currentSlideIndex + 1} / {slides.length}
           </span>
           
+          <button 
+             onClick={() => setLayoutMode(prev => prev === 'adaptive' ? 'fixed' : 'adaptive')}
+             className={`p-2 rounded hover:bg-slate-800 transition-colors ${layoutMode === 'fixed' ? 'text-cyan-400 bg-slate-800' : 'text-slate-300 hover:text-cyan-400'}`}
+             title={layoutMode === 'adaptive' ? "当前: 自适应尺寸 (点击切换为 16:9)" : "当前: 固定 16:9 (点击切换为自适应)"}
+          >
+             {layoutMode === 'adaptive' ? <Monitor size={20} /> : <RectangleHorizontal size={20} />}
+          </button>
+
           <div className="relative">
             <button 
               onClick={() => setShowExportMenu(!showExportMenu)}
@@ -360,10 +369,10 @@ const App: React.FC = () => {
                   className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-2"
                 >
                   <FileType size={16} className="text-red-400" /> 
-                  <div className="flex flex-col">
-                    <span>当前页面导出为 PDF</span>
-                    <span className="text-[10px] text-slate-500">拉伸到同一尺寸 (A4)</span>
-                  </div>
+                    <div className="flex flex-col">
+                      <span>当前页面导出为 PDF</span>
+                      <span className="text-[10px] text-slate-500">适应 A4 纸张</span>
+                    </div>
                 </button>
                 <button 
                   onClick={() => { exportToPNG('slide-viewport', `slide-${currentSlideIndex + 1}.png`); setShowExportMenu(false); }}
@@ -435,13 +444,28 @@ const App: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="w-full h-full flex flex-col">
-             <div className="flex-grow" id="slide-viewport">
-               <SlideView slide={currentSlide} onUpdate={handleUpdateSlide} onDeleteElement={handleDeleteElement} />
+          <div className="w-full h-full flex flex-col relative bg-slate-900">
+             <div className={`flex-grow flex items-center justify-center overflow-hidden ${layoutMode === 'fixed' ? 'p-4' : ''}`}>
+               <div 
+                 id="slide-viewport" 
+                 className={`
+                   transition-all duration-300 ease-in-out relative shadow-2xl
+                   ${layoutMode === 'fixed' ? 'bg-slate-900 border border-slate-800' : ''}
+                 `}
+                 style={layoutMode === 'fixed' ? { 
+                   width: 'min(100%, 177.78vh)', 
+                   aspectRatio: '16/9' 
+                 } : { 
+                   width: '100%', 
+                   height: '100%' 
+                 }}
+               >
+                 <SlideView slide={currentSlide} onUpdate={handleUpdateSlide} onDeleteElement={handleDeleteElement} />
+               </div>
              </div>
              
              {/* Navigation Controls (Bottom Overlay) */}
-             <div className="h-16 flex items-center justify-center gap-8 pb-4 pointer-events-none absolute bottom-0 w-full no-export">
+             <div className="h-16 flex items-center justify-center gap-8 pb-4 pointer-events-none absolute bottom-0 w-full no-export z-50">
                 <button 
                   onClick={prevSlide} 
                   disabled={currentSlideIndex === 0}

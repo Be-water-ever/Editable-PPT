@@ -101,7 +101,6 @@ export const exportToPDF = async (slides: SlideContent[], fileName: string = 'pr
       element.classList.remove('export-mode');
       
       // A4 Landscape: 297mm x 210mm
-      // 16:9 aspect ratio fits well
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
@@ -111,7 +110,28 @@ export const exportToPDF = async (slides: SlideContent[], fileName: string = 'pr
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgRatio = imgProps.width / imgProps.height;
+      const pdfRatio = pdfWidth / pdfHeight;
+
+      let renderW, renderH, offsetX, offsetY;
+
+      // Fit image within PDF page maintaining aspect ratio
+      if (imgRatio > pdfRatio) {
+        // Image is wider than PDF page (relative to height) -> Fit to Width
+        renderW = pdfWidth;
+        renderH = pdfWidth / imgRatio;
+        offsetX = 0;
+        offsetY = (pdfHeight - renderH) / 2;
+      } else {
+        // Image is taller -> Fit to Height
+        renderH = pdfHeight;
+        renderW = pdfHeight * imgRatio;
+        offsetX = (pdfWidth - renderW) / 2;
+        offsetY = 0;
+      }
+      
+      pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderW, renderH);
       pdf.save(fileName);
   } catch (error) {
     console.error('Export to PDF failed:', error);
