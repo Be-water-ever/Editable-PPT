@@ -339,10 +339,20 @@ const App: React.FC = () => {
           
           <button 
              onClick={() => setLayoutMode(prev => prev === 'adaptive' ? 'fixed' : 'adaptive')}
-             className={`p-2 rounded hover:bg-slate-800 transition-colors ${layoutMode === 'fixed' ? 'text-cyan-400 bg-slate-800' : 'text-slate-300 hover:text-cyan-400'}`}
+             className={`p-2 rounded hover:bg-slate-800 transition-colors flex items-center gap-2 ${layoutMode === 'fixed' ? 'text-cyan-400 bg-slate-800' : 'text-slate-300 hover:text-cyan-400'}`}
              title={layoutMode === 'adaptive' ? "当前: 自适应尺寸 (点击切换为 16:9)" : "当前: 固定 16:9 (点击切换为自适应)"}
           >
-             {layoutMode === 'adaptive' ? <Monitor size={20} /> : <RectangleHorizontal size={20} />}
+             {layoutMode === 'adaptive' ? (
+                <>
+                  <Monitor size={18} />
+                  <span className="text-xs font-bold">Auto</span>
+                </>
+             ) : (
+                <>
+                  <RectangleHorizontal size={18} />
+                  <span className="text-xs font-bold">16:9</span>
+                </>
+             )}
           </button>
 
           <div className="relative">
